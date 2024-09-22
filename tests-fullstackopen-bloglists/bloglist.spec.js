@@ -1,5 +1,6 @@
 import { test, expect, beforeEach, describe } from "@playwright/test";
 import dotenv from "dotenv";
+import { createNote } from "./helper";
 
 dotenv.config({ path: ".env.local" });
 
@@ -48,30 +49,29 @@ describe("Blog app", () => {
     });
 
     test("a new blog can be created", async ({ page }) => {
-      const creatBlogButton = page.locator("text=Create new blog post");
-      await creatBlogButton.click();
-      await page.locator("input[name='title']").fill("Cool title");
-      await page.locator("input[name='author']").fill("New blog author");
-      await page.locator("input[name='url']").fill("www.sampleurl.com");
-      await page.locator("button:has-text('create')").click();
-      await expect(page.locator("text=added")).toBeVisible();
+      await createNote(page);
     });
 
     test("a blog can be liked", async ({ page }) => {
-      const createBlogButton = page.locator("text=Create new blog post");
-      await createBlogButton.click();
-      await page.locator("input[name='title']").fill("Test Blog");
-      await page.locator("input[name='author']").fill("Test Author");
-      await page.locator("input[name='url']").fill("http://testblog.com");
-      await page.locator("button:has-text('create')").click();
+      await createNote(page);
 
-      // Wait for the blog to be created
-      await expect(page.locator("text=added")).toBeVisible();
-
-      // Now proceed with liking the blog
       await page.locator("text=view").first().click();
       await page.locator("text=like").click();
       await expect(page.locator("text=likes: 1")).toBeVisible();
+    });
+
+    test("a blog can be deleted", async ({ page }) => {
+      await createNote(page);
+
+      await page.locator("text=view").first().click();
+      await page.locator("text=remove").click();
+      await page.on("dialog", (dialog) => {
+        console.log(dialog.message());
+        dialog.accept();
+      });
+      await expect(
+        page.locator("text=view") && page.locator("text=hide")
+      ).not.toBeVisible();
     });
   });
 });
