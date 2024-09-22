@@ -14,4 +14,11 @@ const createNote = async (page, content) => {
   console.log("Blog created successfully");
 };
 
-export { createNote };
+// Add this function to your helper file
+async function loginUser(page, username, password) {
+  await page.locator("input[name='username']").fill(username);
+  await page.locator("input[name='password']").fill(password);
+  await page.locator("button:has-text('login')").click();
+}
+
+export { createNote, loginUser };

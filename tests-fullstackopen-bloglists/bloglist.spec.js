@@ -73,5 +73,54 @@ describe("Blog app", () => {
         page.locator("text=view") && page.locator("text=hide")
       ).not.toBeVisible();
     });
+
+    describe("Blog ownership", () => {
+      test("only the creator can see the delete button", async ({
+        page,
+        request,
+      }) => {
+        // User who creates the blog
+        const creatorUsername = "creatoruser";
+        const creatorPassword = "creatorpass";
+
+        await page.locator("button:has-text('logout')").click();
+
+        await request.post("http://localhost:3111/api/users", {
+          data: {
+            username: creatorUsername,
+            name: "creatoruser",
+            password: creatorPassword,
+          },
+        });
+
+        await page.goto("http://localhost:5173/");
+
+        // Create and login the first user (creator)
+        await page.locator("input[name='username']").fill(creatorUsername);
+        await page.locator("input[name='password']").fill(creatorPassword);
+        await page.locator("button:has-text('login')").click();
+
+        await page.locator("text=logout").waitFor();
+
+        // Create a note
+        await createNote(page);
+
+        // Log out the first user
+        await page.locator("button:has-text('logout')").click();
+
+        // Create and login the second user (viewer)
+        await page.locator("input[name='username']").fill(username);
+        await page.locator("input[name='password']").fill(password);
+        await page.locator("button:has-text('login')").click();
+
+        // Attempt to view the blog
+        await page.locator("text=view").first().click();
+
+        // Check if the delete button is not visible
+        await expect(
+          page.locator("button:has-text('remove')")
+        ).not.toBeVisible();
+      });
+    });
   });
 });
