@@ -39,4 +39,22 @@ describe("Blog app", () => {
       await expect(page.locator("text=invalid")).toBeVisible();
     });
   });
+
+  describe("When logged in", () => {
+    beforeEach(async ({ page }) => {
+      await page.locator("input[name='username']").fill(username);
+      await page.locator("input[name='password']").fill(password);
+      await page.locator("button:has-text('login')").click();
+    });
+
+    test("a new blog can be created", async ({ page }) => {
+      const creatBlogButton = page.locator("text=Create new blog post");
+      await creatBlogButton.click();
+      await page.locator("input[name='title']").fill("Cool title");
+      await page.locator("input[name='author']").fill("New blog author");
+      await page.locator("input[name='url']").fill("www.sampleurl.com");
+      await page.locator("button:has-text('create')").click();
+      await expect(page.locator("text=added")).toBeVisible();
+    });
+  });
 });
