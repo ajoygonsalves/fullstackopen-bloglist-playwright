@@ -56,5 +56,22 @@ describe("Blog app", () => {
       await page.locator("button:has-text('create')").click();
       await expect(page.locator("text=added")).toBeVisible();
     });
+
+    test("a blog can be liked", async ({ page }) => {
+      const createBlogButton = page.locator("text=Create new blog post");
+      await createBlogButton.click();
+      await page.locator("input[name='title']").fill("Test Blog");
+      await page.locator("input[name='author']").fill("Test Author");
+      await page.locator("input[name='url']").fill("http://testblog.com");
+      await page.locator("button:has-text('create')").click();
+
+      // Wait for the blog to be created
+      await expect(page.locator("text=added")).toBeVisible();
+
+      // Now proceed with liking the blog
+      await page.locator("text=view").first().click();
+      await page.locator("text=like").click();
+      await expect(page.locator("text=likes: 1")).toBeVisible();
+    });
   });
 });
