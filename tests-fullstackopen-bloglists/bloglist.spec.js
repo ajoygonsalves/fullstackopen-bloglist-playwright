@@ -3,12 +3,21 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-const username = process.env.USERNAME;
-const password = process.env.PASSWORD;
+const username = "testuser";
+const password = "testpass";
 
 describe("Blog app", () => {
-  beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:5173");
+  beforeEach(async ({ page, request }) => {
+    await request.post("http://localhost:3111/api/testing/reset");
+    await request.post("http://localhost:3111/api/users", {
+      data: {
+        username: username,
+        name: "testuser",
+        password: password,
+      },
+    });
+
+    await page.goto("http://localhost:5173/");
   });
 
   test("Login form is shown", async ({ page }) => {
